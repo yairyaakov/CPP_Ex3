@@ -64,4 +64,31 @@ The following libraries are used in this implementation:
 
 ## Usage
 
-To run the game, compile the source files (`Board.cpp`, `DevelopmentCard.cpp`, `Edge.cpp`, `Plot.cpp`, `Vertex.cpp`, and `Player.cpp`) and execute the resulting binary. The game will prompt players for their moves and actions according to the game rules.
+### Running the Game
+
+To compile and run the project, use the following command:
+
+```bash
+make catan
+```
+This command compiles the project and executes the main catan application.
+The game will prompt players for their moves and actions according to the game rules.
+
+### Running Tests
+
+To run tests, use the following command:
+
+```bash
+make runtests
+```
+This command executes all unit tests to ensure the correctness of the tree implementation.
+
+### Cleaning Up Files
+
+To delete files created during compilation and execution, use the following command:
+
+```bash
+make clean
+```
+This command removes executable files and object files, leaving the directory clean.
+
