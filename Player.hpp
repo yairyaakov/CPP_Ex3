@@ -33,10 +33,10 @@ public:
     void addResource(const string &resourceType, int amount);
 
     //Get the settlements owned by the player
-    const vector<int> getOwnedSettlements(Board &board) const;
+    vector<int> getOwnedSettlements(Board &board) const;
 
     //Get the settlements owned by the player
-    const vector<int> getOwnedCities(Board &board) const;
+    vector<int> getOwnedCities(Board &board) const;
 
     //Get the settlements owned by the player
     const vector<int> &getOwnedRoads(Board &board) const;
@@ -80,8 +80,11 @@ public:
     // A function that took the top development card from the shuffled deck and gave it to the player. the card will be deleted from the deck.
     void chooseDevelopmentCard(Board &gameBoard);
 
+    // Give to the player some card for test check
+    void setOwnedDevelopmentCard(Board &gameBoard, const string& cardType);
+
     // Function to use 'Monopoly' Development Card - the player chooses some resource and all other players are obliged to transfer this resource to him
-    void useMonopoly(Board &gameBoard, string resource);
+    void useMonopoly(Board &gameBoard, const string& resource);
 
     // Function to use 'Road Building' Development Card - the player can build 2 roads on the map at no cost
     void useRoadBuilding(Board &gameBoard, int vertexIndex1, int vertexIndex2, int vertexIndex3, int vertexIndex4);
@@ -93,7 +96,7 @@ public:
     void useKnight(Board &gameBoard);
 
     // Function for trade resources with other players
-    void tradeResources(Board &gameBoard, string wantedResource ,int wantedResourceAmount, int otherPlayerID, string otherPlayerWantedResource, int otherPlayerWantedResourceAmount);
+    void tradeResources(Board &gameBoard, const string& wantedResource ,int wantedResourceAmount, int otherPlayerID, const string& otherPlayerWantedResource, int otherPlayerWantedResourceAmount);
 
     // Vector to hold the development cards
     vector<string> ownedDevelopmentCards;

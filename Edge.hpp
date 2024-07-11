@@ -5,7 +5,7 @@
 #define EDGE_HPP
 
 #pragma once
-#include "Vertex.hpp"
+
 class Vertex; // Forward declaration
 
 using namespace std;

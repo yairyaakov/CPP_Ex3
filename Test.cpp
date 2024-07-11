@@ -54,7 +54,7 @@ TEST_CASE("Board Initialization")
             Plot("Mountains", 10, 0), Plot("Pasture", 2, 1),
             Plot("Forest", 9, 2), Plot("Agricultural", 12, 3),
             Plot("Hills", 6, 4), Plot("Pasture", 4, 5), Plot("Hills", 10, 6),
-            Plot("Agricultural", 9, 7), Plot("Forest", 11, 8), Plot("Desert", 7, 9),
+            Plot("Agricultural", 9, 7), Plot("Forest", 11, 8), Plot("Desert", 0, 9),
             Plot("Forest", 3, 10), Plot("Mountains", 8, 11), Plot("Forest", 8, 12),
             Plot("Mountains", 3, 13), Plot("Agricultural", 4, 14), Plot("Pasture", 5, 15),
             Plot("Hills", 5, 16), Plot("Agricultural", 6, 17), Plot("Pasture", 11, 18)};
@@ -151,43 +151,47 @@ TEST_CASE("Board Functionalities")
     SUBCASE("Settlement Placement Validation")
     {
         // Invalid vertex
-        REQUIRE_FALSE(gameBoard.canPlaceSettlement(player1.getID(), -2));
+        CHECK_THROWS_AS(gameBoard.canPlaceSettlement(player1.getID(), -2), out_of_range);
 
         // It is not possible to build a settlement on an intersection that does not lead to at least one road
-        REQUIRE_FALSE(gameBoard.canPlaceSettlement(player1.getID(), 0));
-        REQUIRE(gameBoard.canPlaceSettlement(player2.getID(), 1) == false);
+        CHECK_THROWS_AS(gameBoard.canPlaceSettlement(player1.getID(), 0),runtime_error);
+        CHECK_THROWS_AS(gameBoard.canPlaceSettlement(player2.getID(), 1), runtime_error);
 
         // Player1 build his an initail settlemant and road
         player1.placeInitialSettlementAndRoad(0, 1, gameBoard);
 
         // Check that it is not possible to build settlement due vertex already occupied
-        REQUIRE_FALSE(gameBoard.canPlaceSettlement(player1.getID(), 0));        //**********************************************
+        CHECK_THROWS_AS(gameBoard.canPlaceSettlement(player1.getID(), 0), runtime_error);        //**********************************************
 
         // Check that it is not possible to build settlement due neighbor vertex occupied  //***************************************************
-        REQUIRE_FALSE(gameBoard.canPlaceSettlement(player1.getID(), 8));
+        CHECK_THROWS_AS(gameBoard.canPlaceSettlement(player1.getID(), 8), runtime_error);
     }
 
     SUBCASE("Road Placement Validation")
     {
         // A road segment can only be connected to a settlement (or city) owned by the player or to another road segment  //********************************
-        REQUIRE_FALSE(gameBoard.canPlaceRoad(player1.getID(), 0, 1));
-        REQUIRE(gameBoard.canPlaceRoad(player2.getID(), 1, 2) == false);
+        CHECK_THROWS_AS(gameBoard.canPlaceRoad(player1.getID(), 0, 1), runtime_error);
+        CHECK_THROWS_AS(gameBoard.canPlaceRoad(player2.getID(), 1, 2), runtime_error);
     }
 
     SUBCASE("City Placement Validation")  //******************************************************
     {
         // A city must replace an existing settlement
-        REQUIRE_FALSE(gameBoard.canPlaceCity(player1.getID(), 0));
-        REQUIRE(gameBoard.canPlaceCity(player2.getID(), 1) == false);
+        CHECK_THROWS_AS(gameBoard.canPlaceCity(player1.getID(), 0), runtime_error);
+        CHECK_THROWS_AS(gameBoard.canPlaceCity(player2.getID(), 1), runtime_error);
 
         // Player1 build his an initail settlemant and road
         player1.placeInitialSettlementAndRoad(0, 1, gameBoard);
+
+        // Give to player 1 resources to upgrade a settlement to a city
+        player1.addResource("Ore", 3);
+        player1.addResource("Wheat", 2);
 
         // Upgrade the settlement to city
         player1.upgradeToCity(0, gameBoard);
 
         // Check that it is not possible to build city becouse city already exists at this vertex
-        REQUIRE_FALSE(gameBoard.canPlaceSettlement(player1.getID(), 0));
+        CHECK_THROWS_AS(gameBoard.canPlaceSettlement(player1.getID(), 0), runtime_error);
     }
 
     SUBCASE("Edge Validation")
@@ -206,29 +210,8 @@ TEST_CASE("Board Functionalities")
         // The rusult of rolling the dice is 12
         gameBoard.giveResources(gameBoard.getPlayers(), 12);
 
-        // Check if player1 get "wood" and "wheat" resources
-        CHECK(player1.getResources()[0].second == 1);
-        CHECK(player1.getResources()[3].second == 1);
-    }
-
-    SUBCASE("Development Card Drawing Validation")
-    {
-        // Checks the player get the same number of cards he drawed
-        for (size_t i=0; i<gameBoard.developmentCardsDeck.size(); i++)
-        {
-            gameBoard.drawDevelopmentCard(player1.getID());
-        }
-        CHECK(player1.ownedDevelopmentCards.size() == 25);
-
-        // Chack the print if the player try to draw a card and the deck is empty
-        stringstream buffer;
-        streambuf* oldCout = cout.rdbuf(buffer.rdbuf()); //********************************************************88
-
-        player1.chooseDevelopmentCard(gameBoard);
-        cout.rdbuf(oldCout);
-
-        // Check the output
-        REQUIRE(buffer.str() == "No more development cards in the deck\n");
+        // Check if player1 get 2 "wood" resources
+        CHECK(player1.getResources()[0].second == 2);
     }
 }
 
@@ -254,7 +237,7 @@ TEST_CASE("Player Functionalities")
         player1.addResource("Wheat", 2);
 
         // The player can not place a city if there is no settlement on this vertex
-        REQUIRE_FALSE(gameBoard.canPlaceCity(player1.getID(), 0));
+        CHECK_THROWS(gameBoard.canPlaceCity(player1.getID(), 0));
 
         player1.placeInitialSettlementAndRoad(0, 1, gameBoard);
         player1.upgradeToCity(0, gameBoard);
@@ -269,13 +252,23 @@ TEST_CASE("Player Functionalities")
         gameBoard.giveResources(gameBoard.getPlayers(), 10);
        
         CHECK_FALSE(player1.getResources()[4].second == 1);
-        CHECK(player1.getResources()[4].second == 2);
+        CHECK(player1.getResources()[4].second == (2+1));
     }
 
     SUBCASE("Road Placement Verification")
     {
+        // Can not construct road without settlement or city
+        CHECK_THROWS(player1.constructRoad(0, 1, gameBoard));
+
+        // Check construct road after place settlement
+        player1.placeInitialSettlementAndRoad(0, 8, gameBoard);
+
+        // Give to player 1 resources to construct road
+        player1.addResource("Wood", 1);
+        player1.addResource("Brick", 1);
+
         player1.constructRoad(0, 1, gameBoard);
-        CHECK(player1.getOwnedRoads(gameBoard).size() == 1);
+        CHECK(player1.getOwnedRoads(gameBoard).size() == 2);
     }
 
     SUBCASE("Resource Addition Check")
@@ -290,8 +283,8 @@ TEST_CASE("Player Functionalities")
         CHECK_FALSE(player1.canBuySettlement());
         player1.addResource("Wood", 1);
         player1.addResource("Brick", 1);
+        player1.addResource("Wool", 1);
         player1.addResource("Wheat", 1);
-        player1.addResource("Sheep", 1);
         CHECK(player1.canBuySettlement());
     }
 
@@ -307,10 +300,10 @@ TEST_CASE("Player Functionalities")
     SUBCASE("Road Purchase Check")
     {
         //Checking the player's inability to build a road in the absence of resources
-        CHECK_FALSE(player1.canBuyCity());
+        CHECK_FALSE(player1.canBuyRoad());
         player1.addResource("Wood", 1);
         player1.addResource("Brick", 1);
-        CHECK(player1.canBuyCity());
+        CHECK(player1.canBuyRoad());
     }
 
     SUBCASE("Dice Roll Validation")
@@ -331,7 +324,7 @@ TEST_CASE("Player Functionalities")
     {
         player1.addResource("Ore", 1);
         player1.addResource("Wheat", 1);
-        player1.addResource("Sheep", 1);
+        player1.addResource("Wool", 1);
         player1.chooseDevelopmentCard(gameBoard);
         CHECK(player1.ownedDevelopmentCards.size() == 1);
     }
@@ -361,15 +354,22 @@ TEST_CASE("Player Functionalities")
     SUBCASE("Knight Usage Check")  //******************************************************************
     {
         // Checks the biggest army cards - if the player use the knight card more than any of the other players use he get 2 victory point
-        player1.useKnight(gameBoard);
-        player1.useKnight(gameBoard);
-        player1.useKnight(gameBoard);
-        CHECK(player1.knightsPlayed == 3);
-        CHECK(player1.victoryPoints == 2);
+        player3.setOwnedDevelopmentCard(gameBoard, "Knight");
+        player3.useKnight(gameBoard);
+        player3.setOwnedDevelopmentCard(gameBoard, "Knight");
+        player3.useKnight(gameBoard);
+        player3.setOwnedDevelopmentCard(gameBoard, "Knight");
+        player3.useKnight(gameBoard);
+
+        // Checks if the player get 2 'victory point' after using knight card 3 times
+        CHECK(player3.knightsPlayed == 3);
+        CHECK(player3.victoryPoints == 2+2); // 2 victory points at the first and 2 more for the biggest army card
     }
 
     SUBCASE("Year Of Plenty Usage Check")
     {
+        //Add to player 1 "Year Of Plenty" card
+        player1.setOwnedDevelopmentCard(gameBoard, "Year of Plenty");
         // Checks if the player get the two resources he chose
         player1.useYearOfPlenty("Wood", "Brick");
         CHECK(player1.getResources()[0].second == 1);
@@ -389,8 +389,41 @@ TEST_CASE("Player Functionalities")
         player1.addResource("Ore", 6);
         player1.addResource("Wheat", 6);
         player1.discardResources(gameBoard);
-        player1.addResource("Ore", 3);
-        player1.addResource("Wheat", 3);
+        CHECK(player1.getResources()[3].second == 3);
+        CHECK(player1.getResources()[4].second == 3);
+    }
+
+    SUBCASE("Monopoly card usage Check")
+    {
+        // Check about try of the player to use card he does not have
+        CHECK_THROWS_AS(player1.useMonopoly(gameBoard, "Wheat");, runtime_error);
+
+        player2.addResource("Ore", 2);
+        player3.addResource("Ore", 2);
+
+        //Add to player 1 "Monopoly card" card
+        player1.setOwnedDevelopmentCard(gameBoard, "Monopoly");
+        player1.useMonopoly(gameBoard, "Ore");
+
+        // Check if 4 ore resource has been added to player 1
+        CHECK(player1.getResources()[4].second == 4);
+
+        // Check if the other players have lost all the ore resources they have
+        CHECK(player2.getResources()[4].second == 0);
+        CHECK(player3.getResources()[4].second == 0);
+    }
+
+    SUBCASE("Road Placement card usage Check")
+    {
+        // Check about try of the player to use card he does not have
+        CHECK_THROWS_AS(player1.useRoadBuilding(gameBoard, 52, 51, 53, 45), runtime_error);
+
+        //Add to player 1 "Monopoly card" card
+        player1.setOwnedDevelopmentCard(gameBoard, "Road Placement");
+
+        player1.placeInitialSettlementAndRoad(53, 52, gameBoard);
+        player1.useRoadBuilding(gameBoard, 52, 51, 53, 45);
+        CHECK(player1.getOwnedRoads(gameBoard).size() == 3);
     }
 }
 

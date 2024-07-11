@@ -2,82 +2,85 @@
 // yair852258@gmail.com
 
 #include <iostream>
-#include <ctime>
 #include "Player.hpp"
 #include "Board.hpp"
+#include <iostream>
 
 using namespace std;
 
-int main()
-{
-    srand(time(0)); // use current time as seed for random generator
+int main() {
+    Player player1(1, "Ori");
+    Player player2(2, "Ron");
+    Player player3(3, "Yair");
+    Board board(player1, player2, player3);
 
-    Player player(1, "Yair");
-    Player player2(2, "Ori");
-    Player player3(3, "Ron");
+    // the starting placements for every player
 
-    Board board(player, player2, player3);
+    //Ori builds settlements on vertex id: 2,13.  and roads on edges id: 7,15
+    player1.placeInitialSettlementAndRoad(2, 10, board);
+    player1.placeInitialSettlementAndRoad(13, 12, board);
 
-    // Set the initial settlements and roads
-    player.placeInitialSettlementAndRoad(19, 18, board);
-    player2.placeInitialSettlementAndRoad(44, 34, board);
-    player3.placeInitialSettlementAndRoad(42, 43, board);
-    player3.placeInitialSettlementAndRoad(13, 12, board);
-    player2.placeInitialSettlementAndRoad(40, 41, board);
-    player.placeInitialSettlementAndRoad(35, 24, board);
+    //Ron builds settlements on vertex id: 49,51.  and roads on edges id: 63,64.
+    player2.placeInitialSettlementAndRoad(49, 41, board);
+    player2.placeInitialSettlementAndRoad(51, 43, board);
 
-    cout << "\nInitial settlements and roads placed.\n"
-         << endl;
+    //yair builds settlements on vertex id: 29,35.  and roads on edges id: 34,37.
+    player3.placeInitialSettlementAndRoad(29,18, board);
+    player3.placeInitialSettlementAndRoad(35,24, board);
 
-    // Simulate the first 2-3 rounds
 
-    // Round 1
-    cout << "Round 1:\n" << endl;
 
-    player.rollDice(board);
-    player.constructRoad(25, 24, board);
-    player.tradeResources(board, "Brick", 2, 2, "Ore", 1);
-    player.establishSettlement(25, board);
+         //start of the game!!!!!!!!!!!!!
 
+    // Ori roll the dice
+    player1.rollDice(board);
+    player1.constructRoad(11, 12, board);
+
+    //Ron roll the dice
     player2.rollDice(board);
-    player2.tradeResources(board, "Brick", 3, 1, "Ore", 1);
-    player2.constructRoad(33, 34, board);
-    player2.chooseDevelopmentCard(board);
-    player2.establishSettlement(33, board); // Should not be able to place a settlement here
 
+    //Yair roll the dice
     player3.rollDice(board);
-    player3.chooseDevelopmentCard(board);
-    player3.upgradeToCity(13, board); // Should not be able to upgrade to a city here
 
-    // Round 2
-    cout << "\nRound 2:\n" << endl;
 
-    player.rollDice(board);
-    player.chooseDevelopmentCard(board);
-    player.tradeResources(board, "Wool", 2, 2, "Brick", 1);
+    //Ori roll the dice and do a trade
+    player1.rollDice(board);
+    player1.tradeResources(board, "Wheat", 1, 2, "Ore", 1);
 
-    player2.rollDice(board);
-    player2.constructRoad(32, 33, board);
-    player2.useKnight(board);
 
-    player3.rollDice(board);
-    player3.tradeResources(board, "Wheat", 1, 1, "Ore", 1);
-    player3.establishSettlement(14, board);
-
-    // Round 3
-    cout << "\nRound 3:\n" << endl;
-
-    player.rollDice(board);
-    player.constructRoad(26, 25, board);
-    player.upgradeToCity(35, board);
-
+    //Ron roll the dice and buy a development card
     player2.rollDice(board);
     player2.chooseDevelopmentCard(board);
-    player2.establishSettlement(34, board);
 
+
+    //Yair roll the dice and try to trade and build city(this will work or not based on the dice results)
     player3.rollDice(board);
-    player3.useYearOfPlenty("Wheat", "Ore");
+
+    //Yair try to trade - give 1 wood get 1 ore
+    try {
+        player3.tradeResources(board, "Ore", 1, 1, "Wood", 1);
+    }
+    catch (const exception &e)
+    {
+        cout << e.what() << endl;
+    }
+
+    //Yair try to build city
+    try {
+        player3.upgradeToCity(29,board);
+    }
+    catch (const exception &e)
+    {
+        cout << e.what() << endl;
+    }
+
+    try {
+        player3.useYearOfPlenty("Wheat", "Ore");
+    }
+    catch (const exception &e)
+    {
+        cout << e.what() << endl;
+    }
 
     return 0;
 }
-

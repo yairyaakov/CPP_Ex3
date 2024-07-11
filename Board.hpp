@@ -56,6 +56,9 @@ public:
     // Function to draw a random development card
     void drawDevelopmentCard(int playerId);
 
+    // Help function to erase some card
+    void setDevelopmentCardsDeck(const string& typeCard);
+
     // Vector to hold the Development Cards
     vector<DevelopmentCard> developmentCardsDeck;
 

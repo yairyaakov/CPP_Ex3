@@ -324,8 +324,7 @@ bool Board::canPlaceInitialSettlementAndRoad(Player &player, size_t vertexIndex1
     // Ensure vertex indices are within valid range
     if (vertexIndex1 >= vertices.size() || vertexIndex1 < 0 || vertexIndex2 >= vertices.size() || vertexIndex2 < 0)
     {
-        cerr << "Vertex index out of bounds." << endl;
-        return false;
+        throw out_of_range("Vertex index out of bounds.");
     }
 
     // Access the primary vertex
@@ -334,8 +333,7 @@ bool Board::canPlaceInitialSettlementAndRoad(Player &player, size_t vertexIndex1
     // Verify the primary vertex is unoccupied
     if (mainVertex.getOwnerID() != -1)
     {
-        cerr << "Vertex already has an owner." << endl;
-        return false;
+        throw runtime_error("Vertex already has an owner.");
     }
 
     // Check for neighboring vertices ownership
@@ -343,8 +341,7 @@ bool Board::canPlaceInitialSettlementAndRoad(Player &player, size_t vertexIndex1
     {
         if (neighbor->getOwnerID() != -1)
         {
-            cerr << "Neighboring vertex " << neighbor->getIndex() << " is occupied." << endl;
-            return false;
+            throw runtime_error("Neighboring vertex " + to_string(neighbor->getIndex()) + " is occupied.");
         }
     }
 
@@ -352,8 +349,7 @@ bool Board::canPlaceInitialSettlementAndRoad(Player &player, size_t vertexIndex1
     int edgeIdx = getEdgeIndex(vertexIndex1, vertexIndex2);
     if (edgeIdx != -1 && edges[edgeIdx].getOwnerID() != -1)
     {
-        cerr << "Edge already has an owner." << endl;
-        return false;
+        throw runtime_error("Edge already has an owner.");
     }
 
     // Assign the vertex to the player
@@ -371,10 +367,7 @@ bool Board::canPlaceInitialSettlementAndRoad(Player &player, size_t vertexIndex1
         else if (resourceType == "Forest") player.addResource("Wood", 1);
         else if (resourceType == "Agricultural") player.addResource("Wheat", 1);
         else if (resourceType == "Hills") player.addResource("Brick", 1);
-
-
     }
-
     return true;
 }
 
@@ -385,8 +378,7 @@ bool Board::canPlaceSettlement(int playerId, size_t vertexIndex)
     // Check if vertexIndex is valid
     if (vertexIndex >= vertices.size() || vertexIndex < 0)
     {
-        cerr << "Error: vertex index out of range." << endl;
-        return false;
+        throw out_of_range("Error: vertex index out of range.");
     }
 
     // Retrieve the vertex using the given index
@@ -395,8 +387,7 @@ bool Board::canPlaceSettlement(int playerId, size_t vertexIndex)
     // Ensure the vertex is unoccupied by any settlement or city
     if (currentVertex.getBuilding() != Vertex::Building::None)
     {
-        cerr << "Error: vertex already occupied." << endl;
-        return false;
+        throw runtime_error("Error: vertex already occupied.");
     }
 
     // Ensure neighboring vertices are unoccupied
@@ -405,8 +396,7 @@ bool Board::canPlaceSettlement(int playerId, size_t vertexIndex)
     {
         if (neighborVertex->getBuilding() != Vertex::Building::None)
         {
-            cerr << "Error: adjacent vertex " << neighborVertex->getIndex() << " is already taken." << endl;
-            return false;
+            throw runtime_error("Error: adjacent vertex " + std::to_string(neighborVertex->getIndex()) + " is already taken.");
         }
     }
 
@@ -421,8 +411,7 @@ bool Board::canPlaceSettlement(int playerId, size_t vertexIndex)
             return true;
         }
     }
-    cerr << "Error: no connected edges belong to the player." << endl;
-    return false;
+    throw runtime_error("Error: no connected edges belong to the player.");
 }
 
 
@@ -431,8 +420,7 @@ bool Board::canPlaceCity(int playerId, size_t vertexIndex)
     // Check if vertexIndex is valid
     if (vertexIndex >= vertices.size() || vertexIndex < 0)
     {
-        cerr << "Error: vertex index out of range." << endl;
-        return false;
+        throw out_of_range("Error: vertex index out of range.");
     }
 
     // Retrieve the vertex at the given index
@@ -441,15 +429,13 @@ bool Board::canPlaceCity(int playerId, size_t vertexIndex)
     // Ensure the vertex is owned by the player
     if (selectedVertex.getOwnerID() != playerId)
     {
-        cerr << "Error: Vertex is not owned by the player." << endl;
-        return false;
+        throw runtime_error("Error: Vertex is not owned by the player.");
     }
 
     // Confirm the vertex is not already a city
     if (selectedVertex.getBuilding() == Vertex::City)
     {
-        cerr << "Error: Vertex already has a city." << endl;
-        return false;
+        throw runtime_error("Error: Vertex already has a city.");
     }
 
     // Mark the vertex as a city and make the vertex owned by the player
@@ -464,8 +450,7 @@ bool Board::canPlaceRoad(int playerId, size_t vertexIndex1, size_t vertexIndex2)
     // Verify that the vertex indices are within valid bounds
     if (vertexIndex1 >= vertices.size() || vertexIndex2 >= vertices.size() || vertexIndex1 == vertexIndex2 || vertexIndex1 < 0 || vertexIndex2 < 0)
     {
-        cerr << "Error: vertex indices out of range." << endl;
-        return false;
+        throw out_of_range("Error: vertex indices out of range.");
     }
 
     // Retrieve the vertices using the specified indices
@@ -475,8 +460,7 @@ bool Board::canPlaceRoad(int playerId, size_t vertexIndex1, size_t vertexIndex2)
     // Ensure the vertices are adjacent
     if (!vertex1.isNeighbor(vertex2))
         {
-        cerr << "Error: vertices are not adjacent." << endl;
-        return false;
+        throw runtime_error("Error: vertices are not adjacent.");
     }
 
     // Verify the road between these vertices is unoccupied
@@ -488,8 +472,7 @@ bool Board::canPlaceRoad(int playerId, size_t vertexIndex1, size_t vertexIndex2)
         {
             if (edge1 == edge2 && edge1->getOwnerID() != -1)
             {
-                cerr << "Error: road already taken." << endl;
-                return false;
+                throw runtime_error("Error: road already taken.");
             }
         }
     }
@@ -531,7 +514,7 @@ bool Board::canPlaceRoad(int playerId, size_t vertexIndex1, size_t vertexIndex2)
         }
     }
 
-    return false;
+    throw runtime_error("Error:A road segment can only be connected to a settlement (or city) owned by the player or to another road segment.");
 }
 
 
@@ -621,4 +604,18 @@ void Board::drawDevelopmentCard(int playerID)
     string cardType = developmentCardsDeck.back().getType();  // Get the type of the top card
     developmentCardsDeck.pop_back(); // Remove the top card from the deck
     players[playerID - 1]->ownedDevelopmentCards.push_back(cardType); // Add the card to the player's hand
+}
+
+
+// Help function to pop some card
+void Board::setDevelopmentCardsDeck(const string& typeCard)
+{
+    for (size_t i=0; i<developmentCardsDeck.size(); i++)
+    {
+        if (developmentCardsDeck[i].getType() == typeCard)
+        {
+            developmentCardsDeck.erase(developmentCardsDeck.begin()+i);
+            break;
+        }
+    }
 }

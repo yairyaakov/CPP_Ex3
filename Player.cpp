@@ -3,6 +3,7 @@
 
 #include "Player.hpp"
 #include <iostream>
+#include "Board.hpp"
 
 Player::Player(int id, const string &name)
     : ID(id), name(name)
@@ -68,13 +69,13 @@ void Player::addResource(const string &resourceType, int quantity)
 
 
 //Get the settlements owned by the player
-const vector<int> Player::getOwnedSettlements(Board &board) const
+vector<int> Player::getOwnedSettlements(Board &board) const
 {
     return ownedSettlements;
 }
 
 //Get the settlements owned by the player
-const vector<int> Player::getOwnedCities(Board &board) const
+vector<int> Player::getOwnedCities(Board &board) const
 {
     return ownedCities;
 }
@@ -98,7 +99,7 @@ void Player::placeInitialSettlementAndRoad(int vertexIndex1, int vertexIndex2, B
     }
     else
     {
-        cout << this->getName() << " cannot place an initial settlement on vertex " << vertexIndex1 << " and a road between vertices " << vertexIndex1 << " and " << vertexIndex2 << endl;
+        throw runtime_error(this->getName() + " cannot place an initial settlement on vertex " + to_string(vertexIndex1) + " and a road between vertices " + to_string(vertexIndex1) + " and " + to_string(vertexIndex2));
     }
 }
 
@@ -144,8 +145,7 @@ void Player::establishSettlement(int vertexIndex, Board &gameBoard)
     //Check if the player can buy a settlement with the resources he owned
     if (!canBuySettlement())
     {
-        cout << "Player " << getName() << " is unable to establish a settlement due lack of resources." << endl;
-        return;
+        throw runtime_error("Player " + getName() + " is unable to establish a settlement due to lack of resources.");
     }
 
     //Check if the player can buy a settlement considering the state of the game board
@@ -174,7 +174,7 @@ void Player::establishSettlement(int vertexIndex, Board &gameBoard)
     }
     else
     {
-        cout << "Player " << getName() << " cannot establish a settlement at vertex " << vertexIndex << "." << endl;
+        throw runtime_error("Player " + getName() + " cannot place a settlement at vertex " + to_string(vertexIndex) + ".");
     }
 }
 
@@ -196,13 +196,19 @@ void Player::upgradeToCity(int vertexIndex, Board &gameBoard)
     //Check if the player can buy a city with the resources he owned
     if (!canBuyCity())
     {
-        cout << "Player " << this->getName() << " lacks the resources to upgrade a settlement to a city at vertex " << vertexIndex << endl;
-        return;
+        throw runtime_error("Player " + this->getName() + " lacks the resources to upgrade a settlement to a city at vertex " + to_string(vertexIndex));
     }
 
     //Check if the player can buy a city considering the state of the game board
     if (gameBoard.canPlaceCity(this->getID(), vertexIndex))
     {
+        for (size_t i=0; i<ownedSettlements.size(); i++)
+        {
+            if (ownedSettlements[i]==vertexIndex)
+            {
+                ownedSettlements.erase(ownedSettlements.begin() + i);
+            }
+        }
         ownedCities.push_back(vertexIndex);
         cout << "Player " << this->getName() << " has upgraded a settlement to a city at vertex " << vertexIndex << endl;
 
@@ -224,14 +230,14 @@ void Player::upgradeToCity(int vertexIndex, Board &gameBoard)
     }
     else
     {
-        cout << "Player " << this->getName() << " cannot upgrade a settlement to a city at vertex " << vertexIndex << endl;
+        throw runtime_error("Player " + this->getName() + " cannot upgrade a settlement to a city at vertex " + to_string(vertexIndex));
     }
 }
 
 // Check if the player can buy a road with the resources he owned
 bool Player::canBuyRoad() const
 {
-    if (resources[1].second >= 1 && resources[2].second >= 1)
+    if (resources[0].second >= 1 && resources[1].second >= 1)
     {
         return true;
     }
@@ -245,8 +251,7 @@ void Player::constructRoad(int vertexIndex1, int vertexIndex2, Board &gameBoard)
     //Check if the player can buy a settlement with the resources he owned
     if (!canBuyRoad())
     {
-        cout << "Player " << this->getName() << " cannot construct a road between vertices " << vertexIndex1 << " and " << vertexIndex2 << " due lack of resources." << endl;
-        return;
+        throw runtime_error("Player " + this->getName() + " cannot construct a road between vertices " + to_string(vertexIndex1) + " and " + to_string(vertexIndex2) + " due to lack of resources.");
     }
 
     //Check if the player can buy a road considering the state of the game board
@@ -264,7 +269,7 @@ void Player::constructRoad(int vertexIndex1, int vertexIndex2, Board &gameBoard)
     }
     else
     {
-        cout << "Player " << this->getName() << " is unable to construct a road between vertices " << vertexIndex1 << " and " << vertexIndex2 << "." << endl;
+        throw runtime_error("Player " + this->getName() + " is unable to construct a road between vertices " + to_string(vertexIndex1) + " and " + to_string(vertexIndex2) + ".");
     }
 }
 
@@ -289,8 +294,7 @@ bool Player::canBuyDevelopmentCard()
         return true;
     }
 
-    cout << "Player " << this->getName() << " cannot buy a development card because he is broke" << endl;
-    return false;
+    throw runtime_error("Player " + this->getName() + " cannot buy a development card because he is broke");
 }
 
 
@@ -365,8 +369,7 @@ void Player::chooseDevelopmentCard(Board &gameBoard)
     // Insure the deck is not empty
     if (gameBoard.getDeckSize() == 0)
     {
-        cout << "No more development cards in the deck" << endl;
-        return;
+        throw runtime_error("No more development cards in the deck");
     }
 
     // Check if the player has the resources to buy a development card
@@ -400,8 +403,22 @@ void Player::chooseDevelopmentCard(Board &gameBoard)
 }
 
 
+// Give to the player some card for test check
+void Player::setOwnedDevelopmentCard(Board &gameBoard, const string& typeCard)
+{
+    ownedDevelopmentCards.push_back(typeCard);
+    ownedDevelopmentCardsNum++;
+    if (typeCard == "Victory Point")
+    {
+        this->victoryPoints += 1;
+        chackingGameWin(gameBoard);
+    }
+    gameBoard.setDevelopmentCardsDeck(typeCard);
+}
+
+
 // Function to use 'Monopoly' Development Card - The player chooses some resource and all other players are obliged to transfer this resource to him
-void Player::useMonopoly(Board &gameBoard, string resource)
+void Player::useMonopoly(Board &gameBoard, const string& resource)
 {
     // Verify the player owns a Monopoly card
     for (int i = 0; i < ownedDevelopmentCardsNum; i++)
@@ -414,15 +431,15 @@ void Player::useMonopoly(Board &gameBoard, string resource)
                 // The other players
                 if (gameBoard.getPlayers()[j]->getID() != this->getID()-1)
                 {
-                    for (int k = 0; k < gameBoard.getPlayers()[j]->resources.size(); k++)
+                    for (auto & k : gameBoard.getPlayers()[j]->resources)
                     {
-                        if (gameBoard.getPlayers()[j]->resources[k].first == resource)
+                        if (k.first == resource)
                         {
                             // Add to the current player all the amount the other player has of this resource
-                            addResource(resource, gameBoard.getPlayers()[j]->resources[k].second);
+                            addResource(resource, k.second);
 
                             // Now, the other player has nothing left of this resource
-                            gameBoard.getPlayers()[j]->resources[k].second = 0;
+                            k.second = 0;
                         }
                     }
                 }
@@ -433,7 +450,8 @@ void Player::useMonopoly(Board &gameBoard, string resource)
             return;
         }
     }
-    cout << "Player " << this->getName() << " does not possess a Monopoly card" << endl;
+
+    throw runtime_error("Player " + this->getName() + " does not possess a Monopoly card");
 }
 
 
@@ -448,8 +466,10 @@ void Player::useRoadBuilding(Board &gameBoard, int vertexIndex1, int vertexIndex
             // Check if the player can place the roads
             if (gameBoard.canPlaceRoad(this->getID(), vertexIndex1, vertexIndex2) && gameBoard.canPlaceRoad(this->getID(), vertexIndex3, vertexIndex4))
             {
-                constructRoad(vertexIndex1, vertexIndex2, gameBoard);
-                constructRoad(vertexIndex3, vertexIndex4, gameBoard);
+                ownedRoads.push_back(gameBoard.getEdgeIndex(vertexIndex1, vertexIndex2));
+                ownedRoads.push_back(gameBoard.getEdgeIndex(vertexIndex3, vertexIndex4));
+                cout << "Player " << this->getName() << " has successfully constructed a road between vertices " << vertexIndex1 << " and " << vertexIndex2 <<
+                            ", and another road between vertices " << vertexIndex3 << " and " << vertexIndex4 << "." << endl;
 
                 // Remove the Road Building card from the player's hand
                 ownedDevelopmentCards.erase(ownedDevelopmentCards.begin() + i);
@@ -457,11 +477,10 @@ void Player::useRoadBuilding(Board &gameBoard, int vertexIndex1, int vertexIndex
                 return;
             }
 
-            cout << "Player " << this->getName() << " can not place roads in these vertices" << endl;
-            return;
+            throw runtime_error("Player " + this->getName() + " can not place roads in these vertices");
         }
     }
-    cout << "Player " << this->getName() << " does not possess a 'Road Building' card" << endl;
+    throw runtime_error("Player " + this->getName() + " does not possess a 'Road Building' card");
 }
 
 
@@ -486,7 +505,7 @@ void Player::useYearOfPlenty(const string& wantedResource1, const string& wanted
             return;
         }
     }
-    cout << "Player " << this->getName() << " does not possess a 'Year Of Plenty' card" << endl;
+    throw runtime_error("Player " + this->getName() + " does not possess a 'Year Of Plenty' card");
 }
 
 
@@ -532,19 +551,18 @@ void Player::useKnight(Board &gameBoard)
                     chackingGameWin(gameBoard);
                 }
             }
-
             // Remove the Knight card from the player's hand
             ownedDevelopmentCards.erase(ownedDevelopmentCards.begin() + i);
             ownedDevelopmentCardsNum--;
             return;
         }
     }
-    std::cout << "Player " << getName() << " does not possess a knight card." << std::endl;
+    throw runtime_error("Player " + getName() + " does not possess a knight card.");
 }
 
 
 // Function for trade resources with other players
-void Player::tradeResources(Board &gameBoard, string wantedResource ,int wantedResourceAmount, int otherPlayerID, string otherPlayerWantedResource, int otherPlayerWantedResourceAmount)
+void Player::tradeResources(Board &gameBoard, const string& wantedResource ,int wantedResourceAmount, int otherPlayerID, const string& otherPlayerWantedResource, int otherPlayerWantedResourceAmount)
 {
     // check if the current player has the resources thet the other player wants
     for (int i = 0; i < 5; i++)
