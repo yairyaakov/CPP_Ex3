@@ -14,7 +14,7 @@ int main() {
     Player player3(3, "Yair");
     Board board(player1, player2, player3);
 
-    // the starting placements for every player
+    // The starting placements for every player
 
     //Ori builds settlements on vertex id: 2,13.  and roads on edges id: 7,15
     player1.placeInitialSettlementAndRoad(2, 10, board);
@@ -23,6 +23,15 @@ int main() {
     //Ron builds settlements on vertex id: 49,51.  and roads on edges id: 63,64.
     player2.placeInitialSettlementAndRoad(49, 41, board);
     player2.placeInitialSettlementAndRoad(51, 43, board);
+
+    // Yair try to build settlement on vertex that already taken
+    try {
+        player3.placeInitialSettlementAndRoad(49, 50, board);
+    }
+    catch (const exception &e)
+    {
+        cout << e.what() << endl;
+    }
 
     //yair builds settlements on vertex id: 29,35.  and roads on edges id: 34,37.
     player3.placeInitialSettlementAndRoad(29,18, board);

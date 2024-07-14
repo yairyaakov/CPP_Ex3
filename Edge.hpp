@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 class Vertex; // Forward declaration
 
 using namespace std;

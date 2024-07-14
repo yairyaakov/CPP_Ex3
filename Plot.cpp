@@ -7,21 +7,25 @@ Plot::Plot(const string& resource, int number, size_t index)
     : resource(resource), number(number), index(index)
 {}
 
-void Plot:: setVertex(Vertex& vertex) {
-    {
-        vertices.push_back(&vertex);
-    }
+void Plot:: setVertex(Vertex& vertex)
+{
+
+    vertices.push_back(&vertex);
+
 }
 
-string Plot::getResource() const {
+string Plot::getResource() const
+{
     return resource;
 }
 
-int Plot::getNumber() const {
+int Plot::getNumber() const
+{
     return number;
 }
 
-size_t Plot::getIndex() const {
+size_t Plot::getIndex() const
+{
     return index;
 }
 

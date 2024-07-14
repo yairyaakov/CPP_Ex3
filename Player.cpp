@@ -248,7 +248,7 @@ bool Player::canBuyRoad() const
 // Checking if it is possible to construct a road. If possible, construct a road
 void Player::constructRoad(int vertexIndex1, int vertexIndex2, Board &gameBoard)
 {
-    //Check if the player can buy a settlement with the resources he owned
+    //Check if the player can buy a road with the resources he owned
     if (!canBuyRoad())
     {
         throw runtime_error("Player " + this->getName() + " cannot construct a road between vertices " + to_string(vertexIndex1) + " and " + to_string(vertexIndex2) + " due to lack of resources.");
@@ -346,7 +346,7 @@ void Player::discardResources(Board &gameBoard) const
 void Player::rollDice(Board &gameBoard) const
 {
     // Rolling 2 dice
-    int diceRoll = rand() % 6 + 1 + rand() % 6 + 1;
+    int diceRoll = rand() % 6 + 1 + rand() % 6 + 1;  // A number between 0-5 + 1 -> a number between 1-6
 
     if (diceRoll == 7)
     {
@@ -413,7 +413,7 @@ void Player::setOwnedDevelopmentCard(Board &gameBoard, const string& typeCard)
         this->victoryPoints += 1;
         chackingGameWin(gameBoard);
     }
-    gameBoard.setDevelopmentCardsDeck(typeCard);
+    gameBoard.setDevelopmentCardsDeck(typeCard); // The help function
 }
 
 

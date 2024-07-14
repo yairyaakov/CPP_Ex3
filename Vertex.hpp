@@ -24,26 +24,29 @@ public:
     // Get the index of the vertex
     size_t getIndex() const;
 
+    // Get the adjacent vertices
+    const vector<Vertex*>& getneighborsVertices() const;
+
+    // Get edges that the current vertex sits on
+    const vector<Edge*>& getEdgesCover() const;
+
+    // Get the adjacent plots
+    const vector<Plot*>& getadjPlots() const;
+
+    // Get the building type of the current vertex
+    Building getBuilding() const;
+
+    // Get the ID of the player who own the vertex
+    int getOwnerID() const;
+
     // Adding a vertex adjacent to the current vertex
     void addVertexNeighbor(Vertex* vertex);
 
     // Add the edge which the vertex sits on
     void addEdge(Edge* edge);
 
-    // Get the ID of the player who own the vertex
-    int getOwnerID() const;
-
-    // Get the adjacent vertices
-    const vector<Vertex*>& getneighborsVertices() const;
-
-    // Get the adjacent plots
-    const vector<Plot*>& getadjPlots() const;
-
-    // Get edges that the current vertex sits on
-    const vector<Edge*>& getEdgesCover() const;
-
-    // Get the building type of the current vertex
-    Building getBuilding() const;
+    // Add the plot which the vertex sits on
+    void addAdjPlot(Plot *adjPlot);
 
     // Set the building type of the current vertex
     void setBuilding(Building build, int playerID);
@@ -53,12 +56,6 @@ public:
 
     // Check if a vertex is a neighbor
     bool isNeighbor(const Vertex& vertex) const;
-
-    // Get the adjacent edges
-    const vector<Edge*>& getEdges() const;
-
-    // Add
-    void addAdjPlot(Plot *adjPlot);
 
 private:
     size_t index; // Index of the vertex

@@ -54,25 +54,22 @@ void Vertex::setBuilding(Building build, int playerID)
 }
 
 // Set the vertex to be owned by the player
-void Vertex:: setOwner(int playerId)
+void Vertex::setOwner(int playerId)
 {
     owner = playerId;
 }
 
 // Check if a vertex is a neighbor
-bool Vertex::isNeighbor(const Vertex& vertex) const {
-    for (const Vertex* neighbor : neighborsVertices) {
-        if (neighbor->getIndex() == vertex.getIndex()) {
+bool Vertex::isNeighbor(const Vertex& vertex) const
+{
+    for (const Vertex* neighbor : neighborsVertices)
+    {
+        if (neighbor->getIndex() == vertex.getIndex())
+        {
             return true;
         }
     }
     return false;
-}
-
-// Get the adjacent edges
-const vector<Edge*>& Vertex::getEdges() const
-{
-    return edgesCover;
 }
 
 // Get the adjacent plots

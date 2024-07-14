@@ -8,7 +8,7 @@
 
 
 // Helper function to compare two vectors of Plots
-bool comparePlots(const std::vector<Plot> &expected, const std::vector<Plot> &actual)
+bool comparePlots(const vector<Plot> &expected, const vector<Plot> &actual)
 {
     if (expected.size() != actual.size())
     {
@@ -257,7 +257,7 @@ TEST_CASE("Player Functionalities")
 
     SUBCASE("Road Placement Verification")
     {
-        // Can not construct road without settlement or city
+        // Can not construct road without resources
         CHECK_THROWS(player1.constructRoad(0, 1, gameBoard));
 
         // Check construct road after place settlement

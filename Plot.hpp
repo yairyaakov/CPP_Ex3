@@ -14,8 +14,6 @@ class Plot {
 public:
     Plot(const string& resource, int number, size_t index);
 
-    void setVertex(Vertex& vertex);
-
     string getResource() const;
 
     int getNumber() const;
@@ -23,6 +21,8 @@ public:
     size_t getIndex() const;
 
     vector<Vertex*> getVertices() const;
+
+    void setVertex(Vertex& vertex);
 
 private:
     string resource;

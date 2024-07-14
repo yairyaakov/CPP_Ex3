@@ -39,7 +39,7 @@ Board::Board(Player &player1, Player &player2, Player &player3)
     }
 
     // Define the connections between plots and vertices based on my specified order
-    std::vector<std::vector<size_t>> vertexConnections = {
+    vector<vector<size_t>> vertexConnections = {
         {0, 1, 2, 8, 9, 10}, {2, 3, 4, 10, 11, 12}, {4, 5, 6, 12, 13, 14}, {7, 8, 9, 17, 18, 19},
         {9, 10, 11, 19, 20, 21}, {11, 12, 13, 21, 22, 23}, {13, 14, 15, 22, 24, 25}, {16, 17, 18, 27, 28, 29},
         {18, 19, 20, 29, 30, 31}, {20, 21, 22, 31, 32, 33}, {22, 23, 24, 33, 34, 35}, {24, 25, 26, 35, 36, 37},
@@ -219,7 +219,7 @@ Board::Board(Player &player1, Player &player2, Player &player3)
     // Set the vertices for each edge
     for (size_t i = 0; i < edgeConnections.size(); ++i)
     {
-        Edge edge(&vertices[edgeConnections[i][0]], &vertices[edgeConnections[i][1]], i);
+        const Edge edge(&vertices[edgeConnections[i][0]], &vertices[edgeConnections[i][1]], i);
         edges[i]=edge;
 
         // add the edges that the vertex sit on
@@ -464,11 +464,11 @@ bool Board::canPlaceRoad(int playerId, size_t vertexIndex1, size_t vertexIndex2)
     }
 
     // Verify the road between these vertices is unoccupied
-    const vector<Edge *> &edges1 = vertex1.getEdges();
-    const vector<Edge *> &edges2 = vertex2.getEdges();
-    for (const Edge *edge1 : edges1)
+    const vector<Edge *> &edgesCover1 = vertex1.getEdgesCover();
+    const vector<Edge *> &edgesCover2 = vertex2.getEdgesCover();
+    for (const Edge *edge1 : edgesCover1)
     {
-        for (const Edge *edge2 : edges2)
+        for (const Edge *edge2 : edgesCover2)
         {
             if (edge1 == edge2 && edge1->getOwnerID() != -1)
             {
@@ -489,7 +489,7 @@ bool Board::canPlaceRoad(int playerId, size_t vertexIndex1, size_t vertexIndex2)
     }
 
     // Ensure there is at least one connecting edge owned by the player
-    for (const Edge *edge1 : edges1)
+    for (const Edge *edge1 : edgesCover1)
     {
         if (edge1->getOwnerID() == playerId)
         {
@@ -501,7 +501,7 @@ bool Board::canPlaceRoad(int playerId, size_t vertexIndex1, size_t vertexIndex2)
             }
         }
     }
-    for (const Edge *edge2 : edges2)
+    for (const Edge *edge2 : edgesCover2)
     {
         if (edge2->getOwnerID() == playerId)
         {
